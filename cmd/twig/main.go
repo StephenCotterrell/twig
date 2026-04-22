@@ -2,21 +2,16 @@ package main
 
 import (
 	"fmt"
-	"log"
+	"os"
 
-	"github.com/StephenCotterrell/twig/cmd/internal/wg"
+	tea "charm.land/bubbletea/v2"
+	"github.com/StephenCotterrell/twig/cmd/internal/app"
 )
 
 func main() {
-	cfg := wg.DefaultConfig()
-
-	profiles, err := wg.DiscoverProfiles(cfg.WireGuardDir)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	for _, p := range profiles {
-		fmt.Println(p.Name)
-		fmt.Println(p.Path)
+	p := tea.NewProgram(app.InitialModel())
+	if _, err := p.Run(); err != nil {
+		fmt.Printf("Alas, there's been an error: %v", err)
+		os.Exit(1)
 	}
 }
