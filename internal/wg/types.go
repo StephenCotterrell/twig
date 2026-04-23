@@ -1,4 +1,3 @@
-// Package wg provides utilities to access the wg and wg-quick interfaces
 package wg
 
 type ProfileState struct {
