@@ -3,27 +3,39 @@ package app
 
 import (
 	"fmt"
-	"log"
+	"strings"
 
 	tea "charm.land/bubbletea/v2"
+	lipgloss "charm.land/lipgloss/v2"
 	"github.com/StephenCotterrell/twig/cmd/internal/wg"
 )
 
+var (
+	leftPaneStyle = lipgloss.NewStyle().
+			Border(lipgloss.NormalBorder()).
+			Padding(0, 1)
+
+	rightPaneStyle = lipgloss.NewStyle().
+			Border(lipgloss.NormalBorder()).
+			Padding(0, 1)
+)
+
 type Model struct {
-	Profiles []wg.Profile
-	Selected map[int]struct{}
-	cursor   int
+	Profiles      []wg.Profile
+	Selected      int
+	cursor        int
+	width         int
+	height        int
+	detailContent string
 }
 
-func InitialModel() Model {
-	cfg := wg.DefaultConfig()
-	profiles, err := wg.DiscoverProfiles(cfg.WireGuardDir)
-	if err != nil {
-		log.Fatal("failed to discover profiles")
-	}
+func InitialModel(profiles []wg.Profile) Model {
 	return Model{
 		Profiles: profiles,
-		Selected: make(map[int]struct{}),
+		Selected: -1,
+		cursor:   0,
+		width:    80,
+		height:   20,
 	}
 }
 
@@ -42,46 +54,63 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.cursor--
 			}
 		case "down", "j":
-			if m.cursor < len(m.Profiles) {
+			if m.cursor < len(m.Profiles)-1 {
 				m.cursor++
 			}
 		case "enter", "space":
-			_, ok := m.Selected[m.cursor]
-			if ok {
-				delete(m.Selected, m.cursor)
-			} else {
-				m.Selected[m.cursor] = struct{}{}
-			}
+			m.Selected = m.cursor
+		case "esc":
+			m.Selected = -1
 		}
 	}
 
 	return m, nil
 }
 
-func (m Model) View() tea.View {
-	s := "WireGuard Options: \n"
+func (m Model) leftPaneView() string {
+	var s strings.Builder
+	s.WriteString("Profiles\n\n")
 
-	cfg := wg.DefaultConfig()
-	profiles, err := wg.DiscoverProfiles(cfg.WireGuardDir)
-	if err != nil {
-		log.Fatal("failed to discover profiles")
+	if len(m.Profiles) == 0 {
+		s.WriteString("No profiles found\n")
+		return s.String()
 	}
 
-	for i, profile := range profiles {
+	fmt.Fprintf(&s, "WireGuard Options: \n")
+
+	for i, p := range m.Profiles {
 		cursor := " "
-		if m.cursor == i {
+		if i == m.cursor {
 			cursor = ">"
 		}
 
 		checked := " "
-		if _, ok := m.Selected[i]; ok {
+		if i == m.Selected {
 			checked = "x"
 		}
 
-		s += fmt.Sprintf("%s [%s] %s\n", cursor, checked, profile)
+		fmt.Fprintf(&s, "%s [%s] %s\n", cursor, checked, p.Name)
 	}
 
-	s += "\nPress q to quit."
+	fmt.Fprintf(&s, "\nPress q to quit.")
+	return s.String()
+}
 
-	return tea.NewView(s)
+func (m Model) rightPaneView() string {
+	var s strings.Builder
+	if len(m.Profiles) == 0 {
+		s.WriteString("Details\n\nNo profile selected")
+		return s.String()
+	}
+	return "wg show\n\n" + m.detailContent
+}
+
+func (m Model) View() tea.View {
+	leftWidth := m.width / 5 * 2
+	rightWidth := m.width - leftWidth - 1
+
+	left := leftPaneStyle.Width(leftWidth).Height(m.height - 2).Render(m.leftPaneView())
+	right := rightPaneStyle.Width(rightWidth).Height(m.height - 2).Render(m.rightPaneView())
+
+	return tea.NewView(lipgloss.JoinHorizontal(lipgloss.Top, left, right))
 }
