@@ -3,10 +3,12 @@ package app
 
 import (
 	tea "charm.land/bubbletea/v2"
+	"github.com/StephenCotterrell/twig/internal/wg"
 )
 
-func InitialModel() Model {
+func InitialModel(cfg wg.Config) Model {
 	return Model{
+		Config:   cfg,
 		Selected: -1,
 		cursor:   0,
 		width:    100,

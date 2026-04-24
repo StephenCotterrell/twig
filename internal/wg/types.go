@@ -1,5 +1,13 @@
 package wg
 
+type Client struct {
+	Config Config
+}
+
+type Config struct {
+	WireGuardDir string
+}
+
 type ProfileState struct {
 	Profile   Profile
 	IsActive  bool

@@ -7,10 +7,6 @@ import (
 	"strings"
 )
 
-type Config struct {
-	WireGuardDir string
-}
-
 func DefaultConfig() Config {
 	return Config{
 		WireGuardDir: "/etc/wireguard",
