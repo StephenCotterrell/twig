@@ -18,7 +18,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.cursor--
 			}
 		case "down", "j":
-			if m.cursor < len(m.Profiles)-1 {
+			if m.cursor < len(m.ProfileStates)-1 {
 				m.cursor++
 			}
 		case "enter", "space":
@@ -31,14 +31,15 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.DetailContent = string(msg)
 		return m, wgShowPoller()
 
-	case profilesLoadedMsg:
-		m.Profiles = msg
-		return m, wgDiscoverProfilesCmd()
+	case profileStatesLoadedMsg:
+		m.ProfileStates = msg
+		return m, m.wgRefreshProfileStatesCmd()
 
 	case wgTickMsg:
 		return m, tea.Batch(
 			wgShowCmd(),
 			wgShowPoller(),
+			m.wgRefreshProfileStatesCmd(),
 		)
 	}
 
@@ -56,18 +57,19 @@ func wgShowCmd() tea.Cmd {
 }
 
 func wgShowPoller() tea.Cmd {
-	return tea.Tick(3*time.Second, func(time.Time) tea.Msg {
+	return tea.Tick(5*time.Second, func(time.Time) tea.Msg {
 		return wgTickMsg{}
 	})
 }
 
-func wgDiscoverProfilesCmd() tea.Cmd {
+func (m Model) wgRefreshProfileStatesCmd() tea.Cmd {
 	return func() tea.Msg {
-		cfg := wg.DefaultConfig()
-		profiles, err := wg.DiscoverProfiles(cfg.WireGuardDir)
+		client := wg.Client{Config: m.Config}
+		profileStates, err := client.RefreshProfileStates()
 		if err != nil {
 			return nil
 		}
-		return profilesLoadedMsg(profiles)
+
+		return profileStatesLoadedMsg(profileStates)
 	}
 }

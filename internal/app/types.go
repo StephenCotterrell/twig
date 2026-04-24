@@ -4,7 +4,7 @@ import "github.com/StephenCotterrell/twig/internal/wg"
 
 type Model struct {
 	Config        wg.Config
-	Profiles      []wg.Profile
+	ProfileStates []wg.ProfileState
 	Selected      int
 	cursor        int
 	width         int
@@ -13,7 +13,7 @@ type Model struct {
 }
 
 type (
-	wgUpdateMsg       string
-	profilesLoadedMsg []wg.Profile
-	wgTickMsg         struct{}
+	wgUpdateMsg            string
+	profileStatesLoadedMsg []wg.ProfileState
+	wgTickMsg              struct{}
 )

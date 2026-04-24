@@ -20,6 +20,6 @@ func (m Model) Init() tea.Cmd {
 	return tea.Batch(
 		wgShowCmd(),
 		wgShowPoller(),
-		wgDiscoverProfilesCmd(),
+		m.wgRefreshProfileStatesCmd(),
 	)
 }
