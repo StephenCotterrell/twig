@@ -16,6 +16,14 @@ var (
 	rightPaneStyle = lipgloss.NewStyle().
 			Border(lipgloss.NormalBorder()).
 			Padding(0, 1)
+
+	baseItemStyle = lipgloss.NewStyle().PaddingLeft(1)
+
+	// activeItemStyle = baseItemStyle.Foreground(lipgloss.Color("10")).Bold(true)
+
+	// selectedItemStyle = baseItemStyle.Foreground(lipgloss.Color("12"))
+
+	cursorStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("9")).Bold(true)
 )
 
 func (m Model) View() tea.View {
@@ -37,7 +45,7 @@ func (m Model) leftPaneView() string {
 		return s.String()
 	}
 
-	fmt.Fprintf(&s, "WireGuard Options: \n")
+	fmt.Fprintf(&s, "WireGuard Options: \n\n")
 
 	for i, p := range m.ProfileStates {
 		cursor := " "
@@ -47,13 +55,25 @@ func (m Model) leftPaneView() string {
 
 		checked := " "
 		if i == m.Selected {
-			checked = "x"
+			checked = "X"
 		}
+
+		cursorPart := cursorStyle.Render(cursor)
+
+		rowStyle := baseItemStyle
+
+		if i == m.Selected {
+			rowStyle = rowStyle.Foreground(lipgloss.Color("12"))
+		}
+
 		if p.IsActive {
-			fmt.Fprintf(&s, "%s [%s] %s <- Active \n", cursor, checked, p.Profile.Name)
-		} else {
-			fmt.Fprintf(&s, "%s [%s] %s\n", cursor, checked, p.Profile.Name)
+			rowStyle = rowStyle.Bold(true).Foreground(lipgloss.Color("10"))
 		}
+
+		rowPart := rowStyle.Render(fmt.Sprintf(" [%s] %s", checked, p.Profile.Name))
+
+		fmt.Fprintln(&s, cursorPart+rowPart)
+
 	}
 
 	fmt.Fprintf(&s, "\nPress q to quit.")
