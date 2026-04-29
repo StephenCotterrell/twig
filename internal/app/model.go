@@ -8,6 +8,7 @@ import (
 
 func InitialModel(cfg wg.Config) Model {
 	return Model{
+		Status:   "",
 		Config:   cfg,
 		Selected: -1,
 		cursor:   0,

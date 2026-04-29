@@ -3,6 +3,7 @@ package app
 import "github.com/StephenCotterrell/twig/internal/wg"
 
 type Model struct {
+	Status        string
 	Config        wg.Config
 	ProfileStates []wg.ProfileState
 	Selected      int

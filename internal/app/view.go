@@ -74,7 +74,11 @@ func (m Model) leftPaneView() string {
 
 	}
 
-	fmt.Fprintf(&s, "\nPress d for down, u for up.\nPress q to quit.")
+	if m.Status != "" {
+		fmt.Fprintf(&s, "\n%s\n", m.Status)
+	}
+
+	fmt.Fprintf(&s, "\nPress d for down, ctrl+d for down all, u for up.\nesc to clear selection\nPress q to quit.")
 	return s.String()
 }
 

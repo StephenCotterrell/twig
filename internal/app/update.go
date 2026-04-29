@@ -51,12 +51,18 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		)
 
 	case wgDownMsg:
+		if msg.Err != nil {
+			m.Status = msg.Err.Error()
+		} else {
+			m.Status = downStatus(msg.Result)
+		}
 		return m, tea.Batch(
 			wgShowCmd(),
 			m.wgRefreshProfileStatesCmd(),
 		)
 
 	case wgUpMsg:
+		m.Status = string(msg)
 		return m, tea.Batch(
 			wgShowCmd(),
 			m.wgRefreshProfileStatesCmd(),
@@ -125,5 +131,20 @@ func (m Model) wgUpCmd() tea.Cmd {
 			return wgUpMsg(fmt.Sprintf("%v", err))
 		}
 		return wgUpMsg("complete")
+	}
+}
+
+func downStatus(result wg.DownResult) string {
+	switch {
+	case len(result.Attempted) == 0:
+		return "No active tunnels"
+	case len(result.Failed) == 0 && len(result.Down) == 1:
+		return fmt.Sprintf("Disconnected %s", result.Down[0])
+	case len(result.Failed) == 0:
+		return fmt.Sprintf("Disconnected %d tunnels", len(result.Down))
+	case len(result.Down) == 0:
+		return fmt.Sprintf("Failed to disconnect %d tunnel(s)", len(result.Failed))
+	default:
+		return fmt.Sprintf("Disconnected %d tunnel(s), failed %d", len(result.Down), len(result.Failed))
 	}
 }
