@@ -1,6 +1,7 @@
 package app
 
 import (
+	"errors"
 	"fmt"
 	"time"
 
@@ -27,7 +28,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "esc":
 			m.Selected = -1
 		case "d":
-			return m, m.wgDownCmd()
+			return m, m.wgDownSelectedCmd()
+		case "ctrl+d":
+			return m, m.wgDownActiveCmd()
 		case "u":
 			return m, m.wgUpCmd()
 		}
@@ -91,28 +94,24 @@ func (m Model) wgRefreshProfileStatesCmd() tea.Cmd {
 	}
 }
 
-func (m Model) wgDownCmd() tea.Cmd {
+func (m Model) wgDownSelectedCmd() tea.Cmd {
 	return func() tea.Msg {
-		msg := wgDownMsg{
-			Failed: make(map[string]error),
-		}
-
-		for _, state := range m.ProfileStates {
-			if !state.IsActive {
-				continue
+		if m.Selected < 0 || m.Selected >= len(m.ProfileStates) {
+			return wgDownMsg{
+				Err: errors.New("no profile selected"),
 			}
-			name := state.Profile.Name
-			msg.Attempted = append(msg.Attempted, name)
-
-			if err := wg.Down(state); err != nil {
-				msg.Failed[name] = err
-				continue
-			}
-
-			msg.Down = append(msg.Down, name)
 		}
+		return wgDownMsg{
+			Result: wg.DownProfiles([]wg.ProfileState{m.ProfileStates[m.Selected]}),
+		}
+	}
+}
 
-		return msg
+func (m Model) wgDownActiveCmd() tea.Cmd {
+	return func() tea.Msg {
+		return wgDownMsg{
+			Result: wg.DownActive(m.ProfileStates),
+		}
 	}
 }
 

@@ -17,9 +17,8 @@ type (
 	profileStatesLoadedMsg []wg.ProfileState
 	wgTickMsg              struct{}
 	wgDownMsg              struct {
-		Attempted []string
-		Down      []string
-		Failed    map[string]error
+		Result wg.DownResult
+		Err    error
 	}
 	wgUpMsg string
 )

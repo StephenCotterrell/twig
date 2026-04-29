@@ -18,3 +18,33 @@ func Down(profileState ProfileState) error {
 
 	return nil
 }
+
+func DownProfiles(profileStates []ProfileState) DownResult {
+	result := DownResult{
+		Failed: make(map[string]error),
+	}
+	for _, state := range profileStates {
+		name := state.Profile.Name
+		result.Attempted = append(result.Attempted, name)
+
+		if err := Down(state); err != nil {
+			result.Failed[name] = err
+			continue
+		}
+
+		result.Down = append(result.Down, name)
+
+	}
+	return result
+}
+
+func DownActive(profileStates []ProfileState) DownResult {
+	active := []ProfileState{}
+
+	for _, state := range profileStates {
+		if state.IsActive {
+			active = append(active, state)
+		}
+	}
+	return DownProfiles(active)
+}

@@ -36,3 +36,9 @@ type PeerStatus struct {
 	TransmitBytes     int64
 	KeepAliveInterval string
 }
+
+type DownResult struct {
+	Attempted []string
+	Down      []string
+	Failed    map[string]error
+}
