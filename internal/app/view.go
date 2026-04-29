@@ -9,19 +9,15 @@ import (
 )
 
 var (
-	leftPaneStyle = lipgloss.NewStyle().
-			Border(lipgloss.NormalBorder()).
-			Padding(0, 1)
+	leftPaneStyle = lipgloss.NewStyle().Border(lipgloss.NormalBorder()).Padding(0, 1)
 
-	rightPaneStyle = lipgloss.NewStyle().
-			Border(lipgloss.NormalBorder()).
-			Padding(0, 1)
+	rightPaneStyle = lipgloss.NewStyle().Border(lipgloss.NormalBorder()).Padding(0, 1)
 
 	baseItemStyle = lipgloss.NewStyle().PaddingLeft(1)
 
-	// activeItemStyle = baseItemStyle.Foreground(lipgloss.Color("10")).Bold(true)
+	activeItemStyle = baseItemStyle.Foreground(lipgloss.Color("10")).Bold(true)
 
-	// selectedItemStyle = baseItemStyle.Foreground(lipgloss.Color("12"))
+	selectedItemStyle = baseItemStyle.Foreground(lipgloss.Color("12"))
 
 	cursorStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("9")).Bold(true)
 )
@@ -63,20 +59,22 @@ func (m Model) leftPaneView() string {
 		rowStyle := baseItemStyle
 
 		if i == m.Selected {
-			rowStyle = rowStyle.Foreground(lipgloss.Color("12"))
+			rowStyle = selectedItemStyle
 		}
 
+		isActivePart := ""
 		if p.IsActive {
-			rowStyle = rowStyle.Bold(true).Foreground(lipgloss.Color("10"))
+			isActivePart = "[Active]"
+			rowStyle = activeItemStyle
 		}
 
-		rowPart := rowStyle.Render(fmt.Sprintf(" [%s] %s", checked, p.Profile.Name))
+		rowPart := rowStyle.Render(fmt.Sprintf(" [%s] %s %s", checked, p.Profile.Name, isActivePart))
 
 		fmt.Fprintln(&s, cursorPart+rowPart)
 
 	}
 
-	fmt.Fprintf(&s, "\nPress q to quit.")
+	fmt.Fprintf(&s, "\nPress d for down, u for up.\nPress q to quit.")
 	return s.String()
 }
 
