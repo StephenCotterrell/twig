@@ -2,7 +2,9 @@ package wg
 
 import (
 	"errors"
+	"fmt"
 	"os/exec"
+	"strings"
 )
 
 func Down(profileState ProfileState) error {
@@ -11,9 +13,9 @@ func Down(profileState ProfileState) error {
 	}
 
 	cmd := exec.Command("wg-quick", "down", profileState.Profile.Name)
-	_, err := cmd.CombinedOutput()
+	out, err := cmd.CombinedOutput()
 	if err != nil {
-		return err
+		return fmt.Errorf("%s: %w", strings.TrimSpace(string(out)), err)
 	}
 
 	return nil
