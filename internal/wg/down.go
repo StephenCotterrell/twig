@@ -11,7 +11,7 @@ func Down(profileState ProfileState) error {
 	}
 
 	cmd := exec.Command("wg-quick", "down", profileState.Profile.Name)
-	_, err := cmd.Output()
+	_, err := cmd.CombinedOutput()
 	if err != nil {
 		return err
 	}
