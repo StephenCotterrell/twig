@@ -10,6 +10,10 @@ Terminal WireGuard Interface for managing local tunnel profiles and inspecting l
 
 The current version focuses on a small, daily-usable workflow: discover local WireGuard profiles, inspect tunnel state, and run basic up/down actions.
 
+## Motivation
+
+Interface names for WireGuard can be tiresome to type out, particularly if they are descriptive. Discovering and navigating through them creates a more ergonomic workflow.
+
 ## Features
 
 - Discovers WireGuard profiles from `/etc/wireguard`.
@@ -30,11 +34,13 @@ The current version focuses on a small, daily-usable workflow: discover local Wi
 
 `twig` needs permission to run `wg-quick up` and `wg-quick down`. The expected workflow is to build the binary first, then run the built binary with `sudo`.
 
-## Usage
+# Quick Start
 
-Build and run with `sudo`:
+Clone the repo, cd into directory, build and run with `sudo`:
 
 ```sh
+git clone https://github.com/StephenCotterrell/twig
+cd twig
 go build ./cmd/twig
 sudo ./twig
 ```
@@ -47,7 +53,9 @@ For development, you can still run parts of the code and tests without `sudo`:
 go test ./...
 ```
 
-## Keybindings
+## Usage
+
+### Keybindings
 
 - `j` / `down`: move cursor down
 - `k` / `up`: move cursor up
@@ -90,3 +98,28 @@ The core flow has been manually verified with local WireGuard configs:
 - Add favorites or friendly names for commonly used profiles.
 - Improve packaging and installation.
 - Add more tests around parsing, profile discovery, and command result behavior.
+
+## Contributing
+
+### Clone the repo
+
+```bash
+git clone https://github.com/StephenCotterrell/twig
+cd twig
+```
+
+### Build the compiled binary
+
+```bash
+go build -o twig ./cmd/twig
+```
+
+### Run the test suite
+
+```bash
+go test ./...
+```
+
+### Submit a pull request
+
+If you'd like to contribute, please fork the repository and open a pull request to the `main` branch.
