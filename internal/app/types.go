@@ -17,9 +17,14 @@ type (
 	wgUpdateMsg            string
 	profileStatesLoadedMsg []wg.ProfileState
 	wgTickMsg              struct{}
-	wgDownMsg              struct {
-		Result wg.DownResult
-		Err    error
-	}
-	wgUpMsg string
 )
+
+type wgDownMsg struct {
+	Result wg.DownResult
+	Err    error
+}
+
+type wgUpMsg struct {
+	Result wg.UpResult
+	Err    error
+}

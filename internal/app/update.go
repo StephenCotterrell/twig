@@ -62,7 +62,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		)
 
 	case wgUpMsg:
-		m.Status = string(msg)
+		if msg.Err != nil {
+			m.Status = msg.Err.Error()
+		} else {
+			m.Status = upStatus(msg.Result)
+		}
 		return m, tea.Batch(
 			wgShowCmd(),
 			m.wgRefreshProfileStatesCmd(),
@@ -124,13 +128,31 @@ func (m Model) wgDownActiveCmd() tea.Cmd {
 func (m Model) wgUpCmd() tea.Cmd {
 	return func() tea.Msg {
 		if m.Selected < 0 || m.Selected >= len(m.ProfileStates) {
-			return wgUpMsg("No profile selected")
+			return wgUpMsg{
+				Err: errors.New("no profile selected"),
+			}
 		}
-		err := wg.Up(m.ProfileStates[m.Selected])
-		if err != nil {
-			return wgUpMsg(fmt.Sprintf("%v", err))
+		return wgUpMsg{
+			Result: wg.UpProfile(m.ProfileStates[m.Selected]),
 		}
-		return wgUpMsg("complete")
+	}
+}
+
+func upStatus(result wg.UpResult) string {
+	switch {
+	case len(result.Attempted) == 0:
+		return "No profile to connect"
+	case len(result.Failed) == 0 && len(result.Up) == 1:
+		return fmt.Sprintf("Connected %s", result.Up[0])
+	case len(result.Up) == 0 && len(result.Failed) == 1:
+		name, err := singleFailure(result.Failed)
+		return fmt.Sprintf("Failed to connect to %s: %v", name, err)
+	case len(result.Failed) == 0:
+		return fmt.Sprintf("Connected %d tunnels", len(result.Up))
+	case len(result.Up) == 0:
+		return fmt.Sprintf("Failed to connect %d tunnel(s)", len(result.Failed))
+	default:
+		return fmt.Sprintf("Connected %d tunnel(s), failed %d", len(result.Up), len(result.Failed))
 	}
 }
 
@@ -140,6 +162,9 @@ func downStatus(result wg.DownResult) string {
 		return "No active tunnels"
 	case len(result.Failed) == 0 && len(result.Down) == 1:
 		return fmt.Sprintf("Disconnected %s", result.Down[0])
+	case len(result.Down) == 0 && len(result.Failed) == 1:
+		name, err := singleFailure(result.Failed)
+		return fmt.Sprintf("Failed to disconnect from %s: %v", name, err)
 	case len(result.Failed) == 0:
 		return fmt.Sprintf("Disconnected %d tunnels", len(result.Down))
 	case len(result.Down) == 0:
@@ -147,4 +172,11 @@ func downStatus(result wg.DownResult) string {
 	default:
 		return fmt.Sprintf("Disconnected %d tunnel(s), failed %d", len(result.Down), len(result.Failed))
 	}
+}
+
+func singleFailure(failed map[string]error) (string, error) {
+	for name, err := range failed {
+		return name, err
+	}
+	return "", nil
 }

@@ -42,3 +42,9 @@ type DownResult struct {
 	Down      []string
 	Failed    map[string]error
 }
+
+type UpResult struct {
+	Attempted []string
+	Up        []string
+	Failed    map[string]error
+}
