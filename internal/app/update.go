@@ -37,17 +37,17 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case wgUpdateMsg:
 		m.DetailContent = string(msg)
-		return m, wgShowPoller()
+		return m, nil
 
 	case profileStatesLoadedMsg:
 		m.ProfileStates = msg
-		return m, m.wgRefreshProfileStatesCmd()
+		return m, nil
 
 	case wgTickMsg:
 		return m, tea.Batch(
 			wgShowCmd(),
-			wgShowPoller(),
 			m.wgRefreshProfileStatesCmd(),
+			wgShowPoller(),
 		)
 
 	case wgDownMsg:
@@ -87,7 +87,7 @@ func wgShowCmd() tea.Cmd {
 }
 
 func wgShowPoller() tea.Cmd {
-	return tea.Tick(5*time.Second, func(time.Time) tea.Msg {
+	return tea.Tick(time.Second, func(time.Time) tea.Msg {
 		return wgTickMsg{}
 	})
 }
